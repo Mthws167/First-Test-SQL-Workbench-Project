@@ -1,0 +1,202 @@
+/**
+Início / Criando base de dados
+**/
+DROP DATABASE IF EXISTS aula_banco;
+
+CREATE DATABASE aula_banco;
+
+USE aula_banco;
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+DROP TABLE IF EXISTS fornecedor;
+
+CREATE TABLE fornecedor(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(200) NOT NULL UNIQUE 
+,cnpj INT NOT NULL UNIQUE
+,contato CHAR(100) NOT NULL 
+,produto CHAR(100) NOT NULL
+,CONSTRAINT pk_fornecedor PRIMARY KEY (id)
+);
+/** 
+A PK criada em Forncedor é utilizada para diferenciar e identificar na tabela Empresa.
+**/
+ALTER TABLE fornecedor CHANGE cnpj cnpj CHAR(14) NOT NULL UNIQUE;
+INSERT INTO fornecedor (nome,cnpj,contato,produto) VALUES ('fornecedor1','21463823691223','fornece@hotmail.com.br','produto Bom');
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE contato(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(100)
+,telefone int(14)
+,email CHAR(45)
+,CONSTRAINT pk_contato PRIMARY KEY (id)
+);
+
+DROP TABLE contato;
+
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE estoque(
+id INT AUTO_INCREMENT NOT NULL
+,quantidade INT NOT NULL
+,CONSTRAINT pk_estoque PRIMARY KEY (id)
+);
+
+ALTER TABLE estoque ADD COLUMN produtos VARCHAR(200) NOT NULL; 
+INSERT INTO estoque (quantidade,produtos) VALUES (1000,'produto Bom');
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE empresa(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(200) NOT NULL
+,endereco CHAR(200) NOT NULL
+,contato Char(100) NOT NULL 
+,estoque_id INT NOT NULL
+,fornecedor_id INT NOT NULL
+,CONSTRAINT pk_empresa PRIMARY KEY (id)
+,CONSTRAINT fk_empresa_estoque FOREIGN KEY (estoque_id) REFERENCES estoque (id)
+,CONSTRAINT fk_empresa_fornecedor FOREIGN KEY (fornecedor_id) REFERENCES fornecedor (id)
+);
+/** 
+A FK relacionando empresa e estoque vai informar de qual fornecedor vieram os produtos.
+**/
+ALTER TABLE empresa ADD COLUMN cnpj CHAR(14) NOT NULL UNIQUE AFTER nome;
+INSERT INTO empresa (nome,cnpj,endereco,contato,estoque_id,fornecedor_id) VALUES ('empresa Teste','1231241344256','Avenida Imaginação, 204','criativo@hotmail.com.br',1,1);
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE funcao(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(200) NOT NULL
+,descricao CHAR(200)
+,salario CHAR(100) NOT NULL  
+,CONSTRAINT pk_funcao PRIMARY KEY (id)
+);
+
+ALTER TABLE funcao MODIFY COLUMN nome VARCHAR(100) NOT NULL;
+INSERT INTO funcao (nome,descricao,salario) VALUES ('Atendente de Caixa','Atender aos clientes que forrem ao seu caixa.','R$ 1048,00');
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE funcionario(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(100) NOT NULL
+,cpf INT NOT NULL UNIQUE
+,contato CHAR(100) NOT NULL 
+,empresa_id INT NOT NULL
+,funcao_id INT NOT NULL
+,CONSTRAINT  pk_funcionario PRIMARY KEY (id)
+,CONSTRAINT fk_funcionario_empresa FOREIGN KEY(empresa_id) REFERENCES empresa (id)
+,CONSTRAINT fk_funcionario_funcao FOREIGN KEY(funcao_id) REFERENCES funcao (id)
+);
+
+ALTER TABLE funcionario CHANGE cpf cpf CHAR(14) NOT NULL UNIQUE;
+INSERT INTO funcionario (nome,cpf,contato,empresa_id,funcao_id) VALUES ('Novato Junior','12345678912345','novatojunior@gmail.com',1,1);
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE cliente(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(100)
+,cpf CHAR(14) NOT NULL UNIQUE
+,produtos VARCHAR(200) NOT NULL
+,empresa_id INT NOT NULL
+,CONSTRAINT pk_cliente PRIMARY KEY (id)
+,CONSTRAINT fk_cliente_empresa FOREIGN KEY(empresa_id) REFERENCES empresa (id)
+);
+
+INSERT INTO cliente (nome,cpf,produtos,empresa_id) VALUES ('cliente','54321987654321','produto bom',1);
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE produto(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(200) NOT NULL
+,preco_decimal CHAR(100) NOT NULL
+,descricao VARCHAR(200) NOT NULL
+,CONSTRAINT pk_produto PRIMARY KEY (id)
+);
+
+ALTER TABLE produto MODIFY COLUMN nome VARCHAR(100) NOT NULL;
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('produto bom','R$ 10,99','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('maça','R$ 5,99','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('cogumelo','R$ 1,99','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('lentilha','R$ 0,99','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('pé de galinha','R$ 6,50','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('alho','R$ 2,99','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('sal','R$ 11,99','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('suco de uva','R$ 20,40','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('prato fundo','R$ 13,69','produto de alta qualidade');
+INSERT INTO produto (nome,preco_decimal,descricao) VALUES ('hotwheels','R$ 34,99','produto de alta qualidade');
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE venda(
+id INT AUTO_INCREMENT NOT NULL 
+,total_decimal CHAR(100) NOT NULL
+,funcionario_id INT NOT NULL
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,CONSTRAINT pk_venda PRIMARY KEY (id)
+,CONSTRAINT fk_venda_funcionario FOREIGN KEY(funcionario_id) REFERENCES funcionario (id)
+);
+
+INSERT INTO venda (id,total_decimal,funcionario_id) VALUES (1,'R$ 109,90',1);
+INSERT INTO venda (id,total_decimal,funcionario_id) VALUES (2,'R$ 29,95',1);
+INSERT INTO venda (id,total_decimal,funcionario_id) VALUES (3,'R$ 1,99',1);
+INSERT INTO venda (id,total_decimal,funcionario_id) VALUES (4,'R$ 0,99',1);
+INSERT INTO venda (id,total_decimal,funcionario_id) VALUES (5,'R$ 6,50',1);
+INSERT INTO venda (id,total_decimal,funcionario_id) VALUES (6,'R$ 34,99',1);
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE itemvenda(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(100) NOT NULL
+,quantidade INT NOT NULL
+,venda_id INT NOT NULL
+,produto_id INT NOT NULL
+,CONSTRAINT pk_itemvenda PRIMARY KEY (id)
+,CONSTRAINT fk_itemvenda_venda FOREIGN KEY(venda_id) REFERENCES venda  (id)
+,CONSTRAINT fk_itemvenda_produto FOREIGN KEY(produto_id) REFERENCES produto  (id)
+);
+
+INSERT INTO itemvenda (nome,quantidade, venda_id,produto_id) VALUES ('produto bom','10',1,1);
+INSERT INTO itemvenda (nome,quantidade, venda_id,produto_id) VALUES ('maça','5 ',2,2);
+INSERT INTO itemvenda (nome,quantidade, venda_id,produto_id) VALUES ('cogumelo','1',3,3);
+INSERT INTO itemvenda (nome,quantidade, venda_id,produto_id) VALUES ('lentilha','1',4,4);
+INSERT INTO itemvenda (nome,quantidade, venda_id,produto_id) VALUES ('pé de galinha','1',5,5);
+INSERT INTO itemvenda (nome,quantidade, venda_id,produto_id) VALUES ('hotwheels','1 ',6,10);
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE compra(
+id INT AUTO_INCREMENT NOT NULL 
+,total_decimal CHAR(100) NOT NULL
+,cliente_id INT NOT NULL
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,CONSTRAINT pk_compra PRIMARY KEY (id)
+,CONSTRAINT fk_compra_cliente FOREIGN KEY(cliente_id) REFERENCES cliente (id)
+);
+
+INSERT INTO compra (id,total_decimal,cliente_id) VALUES (1,'R$ 109,90',1);
+INSERT INTO compra (id,total_decimal,cliente_id) VALUES (2,'R$ 2,99',1);
+INSERT INTO compra (id,total_decimal,cliente_id) VALUES (3,'R$ 11,99',1);
+INSERT INTO compra (id,total_decimal,cliente_id) VALUES (4,'R$ 20,40',1);
+INSERT INTO compra (id,total_decimal,cliente_id) VALUES (5,'R$ 13,69',1);
+
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+CREATE TABLE itemcompra(
+id INT AUTO_INCREMENT NOT NULL
+,nome VARCHAR(200) NOT NULL
+,quantidade INT NOT NULL
+,compra_id INT NOT NULL
+,produto_id INT NOT NULL
+,CONSTRAINT pk_itemcompra PRIMARY KEY (id)
+,CONSTRAINT fk_itemcompra_compra FOREIGN KEY(compra_id) REFERENCES compra  (id)
+,CONSTRAINT fk_itemcompra_produto FOREIGN KEY(produto_id) REFERENCES produto  (id)
+);
+
+INSERT INTO itemcompra(nome,quantidade,compra_id,produto_id) VALUES('produto bom',1,1,1);
+INSERT INTO itemcompra(nome,quantidade,compra_id,produto_id) VALUES('alho',1,2,6);
+INSERT INTO itemcompra(nome,quantidade,compra_id,produto_id) VALUES('sal',1,3,7);
+INSERT INTO itemcompra(nome,quantidade,compra_id,produto_id) VALUES('suco de uva',1,4,8);
+INSERT INTO itemcompra(nome,quantidade,compra_id,produto_id) VALUES('prato fundo',1,5,9);
+
+/** ----------------------------------------------------------------------------------------------------------------------------------------**/
+SELECT * FROM compra,itemcompra WHERE itemcompra.compra_id=compra.id;
+SELECT * FROM venda,itemvenda WHERE itemvenda.venda_id=venda.id;
+/** ----------------------------------------------------------------------------------------------------------------------------------------
